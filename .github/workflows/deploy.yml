@@ -22,7 +22,8 @@ jobs:
 
     # allows GitHub to retrieve credentials without storing them anywhere
     permissions: 
-      id-token: write
+      # OIDC needs to write, but user auth doesn't
+      #id-token: write
       contents: read
       
     steps:
@@ -30,11 +31,18 @@ jobs:
         uses: actions/checkout@v6.1.0
 
         # where GitHub works with OIDC to grab auth token
-      - name: Assume role with OIDC
+      # - name: Assume role with OIDC
+      #   uses: aws-actions/configure-aws-credentials@v6.2.4
+      #   with: 
+      #     role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+      #     aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Authenticate to AWS with stored Access Keys
         uses: aws-actions/configure-aws-credentials@v6.2.4
-        with: 
-          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
+        with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: ${{ env.AWS_REGION }}
 
       - name: Log in to ECR
         id: ecr
